@@ -1,0 +1,20 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#07191D"/>
+  <circle cx="1360" cy="120" r="380" fill="#087F79" fill-opacity=".28"/>
+  <circle cx="190" cy="800" r="340" fill="#FF7657" fill-opacity=".18"/>
+  <path d="M0 690C250 610 410 770 660 688C930 600 1080 735 1600 570V900H0V690Z" fill="#D9FF70" fill-opacity=".08"/>
+  <rect x="145" y="150" width="1310" height="600" rx="54" fill="white" fill-opacity=".06" stroke="white" stroke-opacity=".18" stroke-width="2"/>
+  <path d="M1118 150V750" stroke="white" stroke-opacity=".14" stroke-width="2" stroke-dasharray="14 14"/>
+  <g transform="translate(205 217)">
+    <rect width="165" height="42" rx="21" fill="#D9FF70"/>
+    <text x="82.5" y="27" text-anchor="middle" fill="#07191D" font-family="Arial, sans-serif" font-size="14" font-weight="800" letter-spacing="2">BOARDING PASS</text>
+  </g>
+  <text x="205" y="385" fill="white" font-family="Arial, sans-serif" font-size="88" font-weight="900">SUA PASSAGEM</text>
+  <text x="205" y="455" fill="#FF7657" font-family="Arial, sans-serif" font-size="88" font-weight="900">ENTRA AQUI.</text>
+  <text x="205" y="535" fill="white" fill-opacity=".52" font-family="Arial, sans-serif" font-size="24">Substitua este arquivo pela imagem real do bilhete.</text>
+  <g transform="translate(1195 275)">
+    <path d="M0 118L190 0L230 16L89 147L225 184L193 207L41 170L-20 222L-48 211L0 118Z" fill="#FF7657"/>
+  </g>
+  <text x="1200" y="575" fill="white" font-family="Arial, sans-serif" font-size="38" font-weight="800">FLN</text>
+  <text x="1200" y="618" fill="white" fill-opacity=".52" font-family="Arial, sans-serif" font-size="18" letter-spacing="4">15 AGO 2026</text>
+</svg>
