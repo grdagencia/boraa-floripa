@@ -10,9 +10,8 @@ export const TRIP = {
 export const UI = {
   // EDITE AQUI a imagem da notificação de venda.
   notificationImage: "/images/notifi.svg",
-  // Tempo visível e intervalo entre notificações (ms).
+  // Tempo visível da notificação (ms). Aparece só na primeira visita.
   notificationVisibleMs: 4200,
-  notificationGapMs: 1500,
   notificationFirstDelayMs: 2800,
   // Quantidade de missões por página no checklist.
   missionsPerPage: 6,

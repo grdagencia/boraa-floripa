@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { UI } from "@/data/trip";
 
+const SEEN_KEY = "floripa-notification-seen";
+
 type SalesNotificationProps = {
   enabled?: boolean;
 };
@@ -19,22 +21,29 @@ export function SalesNotification({ enabled = true }: SalesNotificationProps) {
 
     if (!enabled) return;
 
-    const schedule = (fn: () => void, ms: number) => {
-      const id = window.setTimeout(fn, ms);
-      timersRef.current.push(id);
-      return id;
-    };
+    // Só na primeira visita ao site.
+    try {
+      if (window.localStorage.getItem(SEEN_KEY) === "1") return;
+    } catch {
+      // Se o storage estiver bloqueado, ainda mostra uma vez nesta sessão.
+    }
 
-    const show = () => {
+    const showId = window.setTimeout(() => {
       if (cancelledRef.current) return;
       setVisible(true);
-      schedule(() => {
-        if (cancelledRef.current) return;
-        setVisible(false);
-      }, UI.notificationVisibleMs);
-    };
+      try {
+        window.localStorage.setItem(SEEN_KEY, "1");
+      } catch {
+        // Ignora falha de storage.
+      }
 
-    schedule(show, UI.notificationFirstDelayMs);
+      const hideId = window.setTimeout(() => {
+        if (!cancelledRef.current) setVisible(false);
+      }, UI.notificationVisibleMs);
+      timersRef.current.push(hideId);
+    }, UI.notificationFirstDelayMs);
+
+    timersRef.current.push(showId);
 
     return () => {
       cancelledRef.current = true;
@@ -43,21 +52,8 @@ export function SalesNotification({ enabled = true }: SalesNotificationProps) {
     };
   }, [enabled]);
 
-  const handleExitComplete = () => {
-    if (cancelledRef.current || !enabled) return;
-    const id = window.setTimeout(() => {
-      if (cancelledRef.current) return;
-      setVisible(true);
-      const hideId = window.setTimeout(() => {
-        if (!cancelledRef.current) setVisible(false);
-      }, UI.notificationVisibleMs);
-      timersRef.current.push(hideId);
-    }, UI.notificationGapMs);
-    timersRef.current.push(id);
-  };
-
   return (
-    <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
+    <AnimatePresence mode="wait">
       {visible ? (
         <motion.img
           key="sale-toast"
