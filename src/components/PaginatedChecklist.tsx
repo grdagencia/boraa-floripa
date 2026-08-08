@@ -8,9 +8,10 @@ import {
   PartyPopper,
   Target,
 } from "lucide-react";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { ProgressBar } from "@/components/ProgressBar";
 import { INITIAL_MISSIONS, UI } from "@/data/trip";
+import { TOUR_EVENTS } from "@/lib/countdown";
 
 const STORAGE_KEY = "floripa-missions-v2";
 const CHANGE_EVENT = "floripa-missions-change";
@@ -54,6 +55,29 @@ export function PaginatedChecklist() {
     getServerSnapshot,
   );
   const [currentPage, setCurrentPage] = useState(0);
+  const [tourHighlight, setTourHighlight] = useState(false);
+
+  useEffect(() => {
+    const onTour = (event: Event) => {
+      const detail = (event as CustomEvent).detail as {
+        action?: string;
+        durationMs?: number;
+      };
+      if (detail?.action === "highlight") {
+        setTourHighlight(true);
+        setCurrentPage(0);
+        window.setTimeout(
+          () => setTourHighlight(false),
+          detail.durationMs ?? 7000,
+        );
+      }
+      if (detail?.action === "clear") {
+        setTourHighlight(false);
+      }
+    };
+    window.addEventListener(TOUR_EVENTS.missions, onTour);
+    return () => window.removeEventListener(TOUR_EVENTS.missions, onTour);
+  }, []);
 
   const missions = INITIAL_MISSIONS;
   const missionsPerPage = UI.missionsPerPage;
@@ -105,7 +129,19 @@ export function PaginatedChecklist() {
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          className="rounded-[2rem] border border-white/80 bg-white/75 p-5 shadow-2xl shadow-ink/10 backdrop-blur-xl sm:p-8"
+          animate={
+            tourHighlight
+              ? { x: [0, -10, 10, -8, 8, -4, 4, 0], opacity: 1, y: 0 }
+              : undefined
+          }
+          transition={
+            tourHighlight ? { duration: 0.7, ease: "easeInOut" } : undefined
+          }
+          className={`rounded-[2rem] border bg-white/75 p-5 shadow-2xl shadow-ink/10 backdrop-blur-xl sm:p-8 ${
+            tourHighlight
+              ? "border-coral/50 ring-2 ring-coral/30"
+              : "border-white/80"
+          }`}
         >
           <ProgressBar completed={completed.length} total={missions.length} />
 
@@ -121,16 +157,36 @@ export function PaginatedChecklist() {
               >
                 {visibleMissions.map((mission) => {
                   const done = completed.includes(mission.id);
+                  const pendingHighlight = tourHighlight && !done;
                   return (
                     <motion.button
                       key={mission.id}
                       type="button"
                       whileTap={{ scale: 0.985 }}
+                      animate={
+                        pendingHighlight
+                          ? {
+                              scale: [1, 1.02, 1],
+                              boxShadow: [
+                                "0 0 0 rgba(255,118,87,0)",
+                                "0 0 24px rgba(255,118,87,0.35)",
+                                "0 0 0 rgba(255,118,87,0)",
+                              ],
+                            }
+                          : undefined
+                      }
+                      transition={
+                        pendingHighlight
+                          ? { duration: 1.1, repeat: 4, ease: "easeInOut" }
+                          : undefined
+                      }
                       onClick={() => toggleMission(mission.id)}
                       className={`group flex w-full items-center gap-4 rounded-2xl border px-4 py-4 text-left transition sm:px-5 ${
                         done
                           ? "border-teal/15 bg-teal/[0.07]"
-                          : "border-ink/[0.08] bg-white/60 hover:border-coral/35 hover:bg-white"
+                          : pendingHighlight
+                            ? "border-coral/50 bg-coral/10"
+                            : "border-ink/[0.08] bg-white/60 hover:border-coral/35 hover:bg-white"
                       }`}
                     >
                       <span

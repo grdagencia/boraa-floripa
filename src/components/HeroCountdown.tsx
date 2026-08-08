@@ -1,41 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown, MapPin, Plane } from "lucide-react";
-import { useEffect, useState } from "react";
-import { TRIP } from "@/data/trip";
+import { useEffect, useRef, useState } from "react";
+import { HeroVideoBackground } from "@/components/HeroVideoBackground";
+import { TRIP, UI } from "@/data/trip";
+import { getTimeLeft, type TimeLeft } from "@/lib/countdown";
 
-type TimeLeft = {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-  finished: boolean;
-};
-
-const EMPTY_TIME: TimeLeft = {
-  days: 0,
-  hours: 0,
-  minutes: 0,
-  seconds: 0,
-  finished: false,
-};
-
-function getTimeLeft(): TimeLeft {
-  const distance = new Date(TRIP.targetDate).getTime() - Date.now();
-
-  if (distance <= 0) return { ...EMPTY_TIME, finished: true };
-
-  return {
-    days: Math.floor(distance / 86_400_000),
-    hours: Math.floor((distance / 3_600_000) % 24),
-    minutes: Math.floor((distance / 60_000) % 60),
-    seconds: Math.floor((distance / 1_000) % 60),
-    finished: false,
-  };
-}
+const LAST_DAYS_KEY = "floripa-last-days";
 
 function CountdownTimer({ time }: { time: TimeLeft }) {
+  const urgent = !time.finished && time.days <= UI.urgentDaysThreshold;
   const units = [
     ["Dias", time.days],
     ["Horas", time.hours],
@@ -63,12 +38,24 @@ function CountdownTimer({ time }: { time: TimeLeft }) {
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 + index * 0.08 }}
-          className="glass rounded-2xl px-2 py-4 text-center sm:rounded-3xl sm:px-5 sm:py-6"
+          className={`rounded-2xl px-2 py-4 text-center sm:rounded-3xl sm:px-5 sm:py-6 ${
+            urgent
+              ? "border border-red-500/40 bg-red-600/20 shadow-[0_0_30px_rgba(220,38,38,0.25)]"
+              : "glass"
+          }`}
         >
-          <strong className="block font-display text-3xl font-black tabular-nums text-white sm:text-6xl">
+          <strong
+            className={`block font-display text-3xl font-black tabular-nums sm:text-6xl ${
+              urgent ? "text-red-400" : "text-white"
+            }`}
+          >
             {String(value).padStart(2, "0")}
           </strong>
-          <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.2em] text-white/55 sm:text-xs">
+          <span
+            className={`mt-1 block text-[10px] font-bold uppercase tracking-[0.2em] sm:text-xs ${
+              urgent ? "text-red-300/80" : "text-white/55"
+            }`}
+          >
             {label}
           </span>
         </motion.div>
@@ -78,21 +65,25 @@ function CountdownTimer({ time }: { time: TimeLeft }) {
 }
 
 function DaysRemainingCard({ time }: { time: TimeLeft }) {
-  // Mesmo número de dias do cronômetro (sem arredondar para cima).
   const totalDays = time.finished ? 0 : time.days;
+  const urgent = !time.finished && time.days <= UI.urgentDaysThreshold;
 
   return (
     <motion.div
       initial={{ opacity: 0, x: 30 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.85 }}
-      className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 backdrop-blur-xl"
+      className={`mt-5 flex items-center justify-between rounded-2xl border px-5 py-4 backdrop-blur-xl ${
+        urgent
+          ? "border-red-500/35 bg-red-600/15"
+          : "border-white/10 bg-white/[0.06]"
+      }`}
     >
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">
           Próximo destino · voo {TRIP.displayTime}
         </p>
-        <p className="mt-1 text-lg font-bold text-white">
+        <p className={`mt-1 text-lg font-bold ${urgent ? "text-red-300" : "text-white"}`}>
           {time.finished
             ? "Floripa é agora!"
             : totalDays === 1
@@ -100,7 +91,11 @@ function DaysRemainingCard({ time }: { time: TimeLeft }) {
               : `Faltam ${totalDays} dias para Floripa`}
         </p>
       </div>
-      <div className="grid size-11 place-items-center rounded-full bg-coral text-ink shadow-lg shadow-coral/20">
+      <div
+        className={`grid size-11 place-items-center rounded-full text-ink shadow-lg ${
+          urgent ? "bg-red-500 shadow-red-500/30" : "bg-coral shadow-coral/20"
+        }`}
+      >
         <MapPin size={20} />
       </div>
     </motion.div>
@@ -109,9 +104,53 @@ function DaysRemainingCard({ time }: { time: TimeLeft }) {
 
 export function HeroCountdown() {
   const [time, setTime] = useState<TimeLeft | null>(null);
+  const [dayAlert, setDayAlert] = useState<number | null>(null);
+  const primedDays = useRef(false);
 
   useEffect(() => {
-    const update = () => setTime(getTimeLeft());
+    const update = () => {
+      const next = getTimeLeft(TRIP.targetDate);
+      setTime(next);
+
+      if (next.finished) return;
+
+      if (!primedDays.current) {
+        primedDays.current = true;
+        try {
+          const stored = window.localStorage.getItem(LAST_DAYS_KEY);
+          if (stored === null) {
+            window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
+          } else {
+            const previous = Number(stored);
+            if (Number.isFinite(previous) && next.days < previous) {
+              setDayAlert(next.days);
+              window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
+              window.setTimeout(() => setDayAlert(null), 6500);
+            } else if (next.days !== previous) {
+              window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
+            }
+          }
+        } catch {
+          // storage bloqueado
+        }
+        return;
+      }
+
+      try {
+        const stored = window.localStorage.getItem(LAST_DAYS_KEY);
+        const previous = stored === null ? null : Number(stored);
+        if (previous !== null && Number.isFinite(previous) && next.days < previous) {
+          setDayAlert(next.days);
+          window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
+          window.setTimeout(() => setDayAlert(null), 6500);
+        } else if (previous !== next.days) {
+          window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
+        }
+      } catch {
+        // ignore
+      }
+    };
+
     update();
     const interval = window.setInterval(update, 1000);
     return () => window.clearInterval(interval);
@@ -119,8 +158,7 @@ export function HeroCountdown() {
 
   return (
     <section id="inicio" className="hero relative min-h-[100svh] overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,18,23,.92)_0%,rgba(5,18,23,.6)_53%,rgba(5,18,23,.28)_100%)]" />
-      <div className="noise absolute inset-0 opacity-30" />
+      <HeroVideoBackground />
       <div className="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-between px-5 py-7 sm:px-8 lg:px-12">
         <nav className="flex items-center justify-between">
           <a
@@ -152,6 +190,24 @@ export function HeroCountdown() {
               Let&apos;s go
               <span className="block text-outline">pohaaa</span>
             </motion.h1>
+
+            <AnimatePresence mode="wait">
+              {dayAlert !== null ? (
+                <motion.p
+                  key={dayAlert}
+                  initial={{ opacity: 0, y: 18, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.55 }}
+                  className="mt-5 font-display text-[clamp(1.6rem,4vw,2.8rem)] font-black uppercase tracking-[-0.04em] text-lime"
+                >
+                  {dayAlert === 1
+                    ? "Falta 1 dia. A ilha está perto."
+                    : `Faltam ${dayAlert} dias. O relógio aperta.`}
+                </motion.p>
+              ) : null}
+            </AnimatePresence>
+
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -179,7 +235,10 @@ export function HeroCountdown() {
           </div>
         </div>
 
-        <a href="#passagem" className="flex w-fit items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-white/50 transition hover:text-white">
+        <a
+          href="#passagem"
+          className="flex w-fit items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-white/50 transition hover:text-white"
+        >
           Começar a jornada <ArrowDown className="animate-bounce" size={16} />
         </a>
       </div>

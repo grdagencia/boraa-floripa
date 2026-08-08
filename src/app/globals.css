@@ -38,9 +38,7 @@ a {
 }
 
 .hero {
-  background-image: url("https://images.unsplash.com/photo-1540202404-a2f29016b523?auto=format&fit=crop&w=2400&q=90");
-  background-position: center;
-  background-size: cover;
+  background: #07191d;
 }
 
 .glass {

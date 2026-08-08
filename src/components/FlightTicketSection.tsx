@@ -3,9 +3,28 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { CalendarDays, PlaneTakeoff, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 import { TRIP } from "@/data/trip";
+import { TOUR_EVENTS, wait } from "@/lib/countdown";
 
 export function FlightTicketSection() {
+  const [tourPlay, setTourPlay] = useState(false);
+
+  useEffect(() => {
+    const onTour = async (event: Event) => {
+      const detail = (event as CustomEvent).detail as { action?: string };
+      if (detail?.action !== "interact") return;
+
+      setTourPlay(true);
+      await wait(2800);
+      setTourPlay(false);
+      window.dispatchEvent(new Event(TOUR_EVENTS.ticketDone));
+    };
+
+    window.addEventListener(TOUR_EVENTS.ticket, onTour);
+    return () => window.removeEventListener(TOUR_EVENTS.ticket, onTour);
+  }, []);
+
   return (
     <section id="passagem" className="section-pad relative overflow-hidden bg-sand text-ink">
       <div className="absolute -right-28 top-20 size-96 rounded-full bg-coral/15 blur-3xl" />
@@ -34,22 +53,48 @@ export function FlightTicketSection() {
         </motion.div>
 
         <motion.div
+          id="passagem-card"
           initial={{ opacity: 0, scale: 0.94, rotate: 1.5 }}
           whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
           whileHover={{ y: -8, rotate: -0.5 }}
-          transition={{ duration: 0.65 }}
+          animate={
+            tourPlay
+              ? {
+                  y: [0, -14, -6, -16, 0],
+                  rotate: [0, -1.5, 1, -0.8, 0],
+                  scale: [1, 1.03, 0.98, 1.04, 1],
+                }
+              : undefined
+          }
+          transition={
+            tourPlay
+              ? { duration: 2.4, ease: "easeInOut" }
+              : { duration: 0.65 }
+          }
           viewport={{ once: true, amount: 0.35 }}
-          className="group relative"
+          className="group relative cursor-pointer"
         >
-          <div className="absolute inset-4 rounded-[2rem] bg-ink/20 blur-2xl transition group-hover:blur-3xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white p-3 shadow-2xl shadow-ink/15 sm:p-5">
+          <div
+            className={`absolute inset-4 rounded-[2rem] bg-ink/20 blur-2xl transition ${
+              tourPlay ? "blur-3xl opacity-90" : "group-hover:blur-3xl"
+            }`}
+          />
+          <div
+            className={`relative overflow-hidden rounded-[2rem] border bg-white p-3 shadow-2xl shadow-ink/15 sm:p-5 ${
+              tourPlay
+                ? "border-coral/50 ring-2 ring-coral/30"
+                : "border-white/70"
+            }`}
+          >
             <div className="relative aspect-[4/3] overflow-hidden rounded-[1.4rem] bg-ink/5">
               <Image
                 src={TRIP.ticketImage}
                 alt="Cartão de viagem para Florianópolis"
                 fill
                 sizes="(max-width: 1024px) 100vw, 60vw"
-                className="object-contain p-2 transition duration-700 group-hover:scale-[1.02] sm:p-3"
+                className={`object-contain p-2 transition duration-700 sm:p-3 ${
+                  tourPlay ? "scale-[1.04]" : "group-hover:scale-[1.02]"
+                }`}
                 priority
               />
             </div>

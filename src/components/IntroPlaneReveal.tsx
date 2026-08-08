@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UI } from "@/data/trip";
 
 type IntroPlaneRevealProps = {
@@ -9,33 +9,38 @@ type IntroPlaneRevealProps = {
 };
 
 export function IntroPlaneReveal({ onComplete }: IntroPlaneRevealProps) {
-  // Começa já visível para o avião entrar na hora (sem atraso no PC).
   const [visible, setVisible] = useState(true);
   const duration = UI.introDurationMs / 1000;
+  const doneRef = useRef(false);
 
   useEffect(() => {
     document.documentElement.style.overflow = "hidden";
 
     const finishTimer = window.setTimeout(() => {
       setVisible(false);
-      document.documentElement.style.overflow = "";
-      onComplete?.();
     }, UI.introDurationMs);
 
     return () => {
       window.clearTimeout(finishTimer);
       document.documentElement.style.overflow = "";
     };
-  }, [onComplete]);
+  }, []);
+
+  const handleExitComplete = () => {
+    document.documentElement.style.overflow = "";
+    if (doneRef.current) return;
+    doneRef.current = true;
+    onComplete?.();
+  };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={handleExitComplete}>
       {visible ? (
         <motion.div
           className="fixed inset-0 z-[100] overflow-hidden bg-ink"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.45, ease: "easeInOut" }}
           aria-hidden
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(255,118,87,0.18),transparent_45%),radial-gradient(circle_at_70%_60%,rgba(217,255,112,0.1),transparent_40%)]" />
@@ -57,12 +62,10 @@ export function IntroPlaneReveal({ onComplete }: IntroPlaneRevealProps) {
             }}
             transition={{
               duration,
-              // Entra rápido no início (~10% do tempo) e cruza o resto com calma.
               times: [0, 0.1, 0.55, 1],
               ease: "easeInOut",
             }}
           >
-            {/* SVG externo: next/image não otimiza SVG */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={UI.planeImage}

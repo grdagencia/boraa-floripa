@@ -4,28 +4,38 @@ import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ExternalLink, MapPin, Star } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AIRBNB_OPTIONS, type AirbnbOption } from "@/data/trip";
+import { TOUR_EVENTS, wait } from "@/lib/countdown";
 
 function AirbnbCard({
   option,
   active,
+  pulsing,
 }: {
   option: AirbnbOption;
   active: boolean;
+  pulsing: boolean;
 }) {
   return (
     <motion.a
       href={option.url}
       target="_blank"
       rel="noopener noreferrer"
-      animate={{ scale: active ? 1 : 0.94, opacity: active ? 1 : 0.65 }}
-      transition={{ duration: 0.45 }}
+      animate={{
+        scale: pulsing ? [1, 1.04, 1] : active ? 1 : 0.94,
+        opacity: active || pulsing ? 1 : 0.65,
+      }}
+      transition={
+        pulsing
+          ? { duration: 0.7, repeat: 4, ease: "easeInOut" }
+          : { duration: 0.45 }
+      }
       className={`group block overflow-hidden rounded-[2rem] border p-3 shadow-2xl shadow-black/20 backdrop-blur-xl ${
         option.preferred
           ? "border-lime/50 bg-lime/[0.08] ring-1 ring-lime/30"
           : "border-white/10 bg-white/[0.07]"
-      }`}
+      } ${pulsing ? "ring-2 ring-lime shadow-[0_0_40px_rgba(217,255,112,0.35)]" : ""}`}
       aria-label={`Ver ${option.name} — ${option.neighborhood} no Airbnb`}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-[1.45rem]">
@@ -82,6 +92,14 @@ export function AirbnbCarousel() {
   });
   const [selected, setSelected] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [tourLocked, setTourLocked] = useState(false);
+  const [pulseIndex, setPulseIndex] = useState<number | null>(null);
+  const spinningRef = useRef(false);
+  const emblaApiRef = useRef(emblaApi);
+
+  useEffect(() => {
+    emblaApiRef.current = emblaApi;
+  }, [emblaApi]);
 
   const syncSelected = useCallback(() => {
     if (emblaApi) setSelected(emblaApi.selectedScrollSnap());
@@ -102,10 +120,87 @@ export function AirbnbCarousel() {
   }, [emblaApi, pauseAutoplay, syncSelected]);
 
   useEffect(() => {
-    if (!emblaApi || paused) return;
+    if (!emblaApi || paused || tourLocked) return;
     const autoplay = window.setInterval(() => emblaApi.scrollNext(), 5200);
     return () => window.clearInterval(autoplay);
-  }, [emblaApi, paused]);
+  }, [emblaApi, paused, tourLocked]);
+
+  useEffect(() => {
+      const spinToPreferred = async (fastMs = 5000) => {
+      const api = emblaApiRef.current;
+      if (!api || spinningRef.current) return;
+      spinningRef.current = true;
+      setTourLocked(true);
+      setPaused(true);
+      setPulseIndex(null);
+
+      try {
+        const preferredIndex = Math.max(
+          0,
+          AIRBNB_OPTIONS.findIndex((option) => option.preferred),
+        );
+
+        // Gira rápido a partir do card atual — sem voltar pro início.
+        const fastUntil = Date.now() + fastMs;
+        while (Date.now() < fastUntil) {
+          api.scrollNext();
+          await wait(85);
+        }
+
+        // Desacelera até pousar no preferido.
+        let delay = 140;
+        let safety = AIRBNB_OPTIONS.length * 3;
+        while (api.selectedScrollSnap() !== preferredIndex && safety > 0) {
+          api.scrollNext();
+          await wait(delay);
+          delay = Math.min(delay + 90, 650);
+          safety -= 1;
+        }
+
+        if (api.selectedScrollSnap() !== preferredIndex) {
+          api.scrollTo(preferredIndex);
+          await wait(400);
+        }
+
+        setPulseIndex(preferredIndex);
+      } finally {
+        spinningRef.current = false;
+        window.dispatchEvent(new Event(TOUR_EVENTS.airbnbSpinDone));
+      }
+    };
+
+    const onTour = (event: Event) => {
+      const detail = (event as CustomEvent).detail as {
+        action?: string;
+        index?: number;
+        fastMs?: number;
+      };
+      if (!detail?.action) return;
+
+      if (detail.action === "pause") {
+        setTourLocked(true);
+        setPaused(true);
+      }
+      if (detail.action === "resume") {
+        setTourLocked(false);
+        setPaused(false);
+        setPulseIndex(null);
+      }
+      if (detail.action === "goto" && typeof detail.index === "number") {
+        emblaApiRef.current?.scrollTo(detail.index);
+      }
+      if (detail.action === "pulse" && typeof detail.index === "number") {
+        emblaApiRef.current?.scrollTo(detail.index);
+        setPulseIndex(detail.index);
+      }
+      if (detail.action === "spinToPreferred") {
+        void spinToPreferred(detail.fastMs ?? 5000);
+      }
+    };
+
+    window.addEventListener(TOUR_EVENTS.airbnb, onTour);
+    return () => window.removeEventListener(TOUR_EVENTS.airbnb, onTour);
+  }, []);
 
   return (
     <section id="airbnbs" className="section-pad overflow-hidden bg-ink text-white">
@@ -125,10 +220,15 @@ export function AirbnbCarousel() {
       </motion.div>
 
       <div
+        id="airbnb-stage"
         className="cursor-grab overflow-hidden active:cursor-grabbing"
         ref={emblaRef}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
+        onMouseEnter={() => {
+          if (!tourLocked) setPaused(true);
+        }}
+        onMouseLeave={() => {
+          if (!tourLocked) setPaused(false);
+        }}
       >
         <div className="flex touch-pan-y">
           {AIRBNB_OPTIONS.map((option, index) => (
@@ -136,7 +236,11 @@ export function AirbnbCarousel() {
               key={option.id}
               className="min-w-0 flex-[0_0_90%] px-2 sm:flex-[0_0_72%] lg:flex-[0_0_58%] lg:px-4"
             >
-              <AirbnbCard option={option} active={selected === index} />
+              <AirbnbCard
+                option={option}
+                active={selected === index}
+                pulsing={pulseIndex === index}
+              />
             </div>
           ))}
         </div>

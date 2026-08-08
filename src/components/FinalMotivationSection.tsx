@@ -6,7 +6,7 @@ import { ArrowUp, Palmtree } from "lucide-react";
 
 export function FinalMotivationSection() {
   return (
-    <section className="relative flex min-h-[85svh] items-center overflow-hidden">
+    <section id="final" className="relative flex min-h-[85svh] items-center overflow-hidden">
       <Image
         src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=90"
         alt="Praia de águas azuis ao pôr do sol"
