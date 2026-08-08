@@ -1,8 +1,9 @@
 export const TRIP = {
-  // EDITE AQUI a data e o fuso da viagem.
-  targetDate: "2026-08-15T00:00:00-03:00",
+  // EDITE AQUI a data/hora do voo (fuso America/Sao_Paulo).
+  targetDate: "2026-08-15T05:55:00-03:00",
   timeZone: "America/Sao_Paulo",
   displayDate: "15 de agosto de 2026",
+  displayTime: "05:55",
   // EDITE AQUI a imagem do cartão / bilhete (arquivo em public/images/).
   ticketImage: "/images/cartao.png",
 };

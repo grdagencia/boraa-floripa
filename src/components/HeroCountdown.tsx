@@ -78,9 +78,8 @@ function CountdownTimer({ time }: { time: TimeLeft }) {
 }
 
 function DaysRemainingCard({ time }: { time: TimeLeft }) {
-  const totalDays = time.finished
-    ? 0
-    : time.days + (time.hours + time.minutes + time.seconds > 0 ? 1 : 0);
+  // Mesmo número de dias do cronômetro (sem arredondar para cima).
+  const totalDays = time.finished ? 0 : time.days;
 
   return (
     <motion.div
@@ -91,10 +90,14 @@ function DaysRemainingCard({ time }: { time: TimeLeft }) {
     >
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">
-          Próximo destino
+          Próximo destino · voo {TRIP.displayTime}
         </p>
         <p className="mt-1 text-lg font-bold text-white">
-          {time.finished ? "Floripa é agora!" : `Faltam ${totalDays} dias para Floripa`}
+          {time.finished
+            ? "Floripa é agora!"
+            : totalDays === 1
+              ? "Falta 1 dia para Floripa"
+              : `Faltam ${totalDays} dias para Floripa`}
         </p>
       </div>
       <div className="grid size-11 place-items-center rounded-full bg-coral text-ink shadow-lg shadow-coral/20">
@@ -127,7 +130,7 @@ export function HeroCountdown() {
             <Plane className="text-coral" size={18} /> FLN / 2026
           </a>
           <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 backdrop-blur-md">
-            15 AGO 2026
+            15 AGO · {TRIP.displayTime}
           </span>
         </nav>
 

@@ -21,11 +21,11 @@ export function FlightTicketSection() {
             <span className="block text-coral">É passagem.</span>
           </h2>
           <p className="mt-6 max-w-md text-base leading-7 text-ink/60">
-            Em {TRIP.displayDate}, a rota muda e a ilha volta a fazer parte da nossa história.
+            Em {TRIP.displayDate}, às {TRIP.displayTime}, a rota muda e a ilha volta a fazer parte da nossa história.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <span className="info-pill">
-              <CalendarDays size={16} /> 15 AGO 2026
+              <CalendarDays size={16} /> 15 AGO · {TRIP.displayTime}
             </span>
             <span className="info-pill">
               <PlaneTakeoff size={16} /> Destino FLN
