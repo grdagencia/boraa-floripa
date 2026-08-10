@@ -6,3 +6,9 @@ out/
 .env*
 !.env.example
 .vercel
+
+# Originais 4K pesados demais pro GitHub — usamos public/videos/*.mp4 otimizados.
+public/images/2.mp4
+public/images/3.mp4
+public/images/4.mp4
+public/images/Floripa4k.mp4

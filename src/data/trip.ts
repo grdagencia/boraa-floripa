@@ -20,10 +20,18 @@ export const UI = {
   planeImage: "/images/aviao.svg",
   // Duração total da animação de abertura com avião (ms).
   introDurationMs: 5000,
-  // EDITE AQUI o vídeo de fundo do hero.
-  heroVideo: "/images/Floripa4k.mp4",
+  // EDITE AQUI os vídeos de fundo do hero (ordem do playlist).
+  // Versões otimizadas em public/videos/ (1080p, sem áudio, faststart).
+  heroVideos: [
+    "/videos/1.mp4", // Floripa4k
+    "/videos/2.mp4",
+    "/videos/3.mp4",
+    "/videos/4.mp4",
+  ],
   // Velocidade do vídeo (1 = normal, 0.5 = metade da velocidade).
   heroVideoPlaybackRate: 0.55,
+  // Fade entre um vídeo e o próximo (ms).
+  heroVideoCrossfadeMs: 900,
   // Timer fica vermelho quando faltam este número de dias ou menos.
   urgentDaysThreshold: 2,
 };
