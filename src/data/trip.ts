@@ -34,6 +34,10 @@ export const UI = {
   heroVideoCrossfadeMs: 900,
   // Timer fica vermelho quando faltam este número de dias ou menos.
   urgentDaysThreshold: 3,
+  // Vídeos da seção Chile (após CUIUDO). Coloque os arquivos em public/videos/.
+  chileVideos: ["/videos/chile1.mp4", "/videos/chile2.mp4", "/videos/chile3.mp4"],
+  // Alternância título ↔ copy motivacional (ms).
+  heroTitleRotateMs: 60_000,
 };
 
 export type AirbnbOption = {

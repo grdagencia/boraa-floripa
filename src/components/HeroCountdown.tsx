@@ -1,16 +1,20 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown, MapPin, Plane } from "lucide-react";
 import { useEffect, useState } from "react";
+import { DatePickerModal } from "@/components/DatePickerModal";
 import { HeroVideoBackground } from "@/components/HeroVideoBackground";
 import {
   DefaultHeroSubtitle,
   HeroTitleBlock,
 } from "@/components/MotivationalHeroTitle";
-import { TRIP, UI } from "@/data/trip";
+import { useTrip } from "@/components/TripProvider";
+import { UI } from "@/data/trip";
 import { useMotivationalHeroDay } from "@/hooks/useMotivationalHeroDay";
-import { getTimeLeft, type TimeLeft } from "@/lib/countdown";
+import type { TimeLeft } from "@/lib/countdown";
+import { launchPartyBurst } from "@/lib/party";
+import { playSadTrombone } from "@/lib/celebration";
 
 function CountdownTimer({ time }: { time: TimeLeft }) {
   const urgent = !time.finished && time.days <= UI.urgentDaysThreshold;
@@ -21,42 +25,29 @@ function CountdownTimer({ time }: { time: TimeLeft }) {
     ["Seg", time.seconds],
   ] as const;
 
-  if (time.finished) {
-    return (
-      <motion.div
-        initial={{ scale: 0.85, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="rounded-3xl border border-lime/30 bg-lime/10 px-6 py-8 text-center text-2xl font-black text-lime sm:text-4xl"
-      >
-        CHEGOU O DIA. PARTIU FLORIPA! 🌴✈️
-      </motion.div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-4 gap-2 sm:gap-4" aria-label="Contagem regressiva">
+    <div
+      className={`grid grid-cols-4 gap-2 sm:gap-4 ${time.finished ? "timer-pulse" : ""}`}
+      aria-label="Contagem regressiva"
+    >
       {units.map(([label, value], index) => (
         <motion.div
           key={label}
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 + index * 0.08 }}
-          className={`rounded-2xl px-2 py-4 text-center sm:rounded-3xl sm:px-5 sm:py-6 ${
-            urgent
-              ? "border border-red-500/40 bg-red-600/20 shadow-[0_0_30px_rgba(220,38,38,0.25)]"
-              : "glass"
-          }`}
+          className="glass rounded-2xl px-2 py-4 text-center sm:rounded-3xl sm:px-5 sm:py-6"
         >
           <strong
             className={`block font-display text-3xl font-black tabular-nums sm:text-6xl ${
-              urgent ? "text-red-400" : "text-white"
+              urgent || time.finished ? "text-red-400" : "text-white"
             }`}
           >
             {String(value).padStart(2, "0")}
           </strong>
           <span
             className={`mt-1 block text-[10px] font-bold uppercase tracking-[0.2em] sm:text-xs ${
-              urgent ? "text-red-300/80" : "text-white/55"
+              urgent || time.finished ? "text-red-300/80" : "text-white/55"
             }`}
           >
             {label}
@@ -67,7 +58,13 @@ function CountdownTimer({ time }: { time: TimeLeft }) {
   );
 }
 
-function DaysRemainingCard({ time }: { time: TimeLeft }) {
+function DaysRemainingCard({
+  time,
+  displayTime,
+}: {
+  time: TimeLeft;
+  displayTime: string;
+}) {
   const totalDays = time.finished ? 0 : time.days;
   const urgent = !time.finished && time.days <= UI.urgentDaysThreshold;
 
@@ -76,17 +73,17 @@ function DaysRemainingCard({ time }: { time: TimeLeft }) {
       initial={{ opacity: 0, x: 30 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.85 }}
-      className={`mt-5 flex items-center justify-between rounded-2xl border px-5 py-4 backdrop-blur-xl ${
-        urgent
-          ? "border-red-500/35 bg-red-600/15"
-          : "border-white/10 bg-white/[0.06]"
-      }`}
+      className="mt-5 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 backdrop-blur-xl"
     >
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">
-          Próximo destino · voo {TRIP.displayTime}
+          Próximo destino · voo {displayTime}
         </p>
-        <p className={`mt-1 text-lg font-bold ${urgent ? "text-red-300" : "text-white"}`}>
+        <p
+          className={`mt-1 text-lg font-bold ${
+            urgent || time.finished ? "text-red-300" : "text-white"
+          }`}
+        >
           {time.finished
             ? "Floripa é agora!"
             : totalDays === 1
@@ -94,33 +91,104 @@ function DaysRemainingCard({ time }: { time: TimeLeft }) {
               : `Faltam ${totalDays} dias para Floripa`}
         </p>
       </div>
-      <div
-        className={`grid size-11 place-items-center rounded-full text-ink shadow-lg ${
-          urgent ? "bg-red-500 shadow-red-500/30" : "bg-coral shadow-coral/20"
-        }`}
-      >
+      <div className="grid size-11 place-items-center rounded-full bg-coral text-ink shadow-lg shadow-coral/20">
         <MapPin size={20} />
       </div>
     </motion.div>
   );
 }
 
-export function HeroCountdown() {
-  const [time, setTime] = useState<TimeLeft | null>(null);
-  const heroCopy = useMotivationalHeroDay(time);
-  const isMotivational = heroCopy.mode === "motivational";
+function ChoiceButtons({
+  onCuiudo,
+  onMacio,
+}: {
+  onCuiudo: () => void;
+  onMacio: () => void;
+}) {
+  return (
+    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <button
+        type="button"
+        onClick={onCuiudo}
+        className="rounded-full bg-lime px-6 py-4 text-left text-sm font-black uppercase tracking-[0.06em] text-ink shadow-[0_0_40px_rgba(217,255,112,0.35)] transition hover:scale-[1.02] hover:brightness-105"
+      >
+        Óbvio né — Aqui é CUIUDO
+      </button>
+      <button
+        type="button"
+        onClick={onMacio}
+        className="rounded-full border border-white/20 bg-white/10 px-6 py-4 text-left text-sm font-black uppercase tracking-[0.06em] text-white backdrop-blur-md transition hover:border-coral/50 hover:bg-coral/15"
+      >
+        Não — Fui Macio
+      </button>
+    </div>
+  );
+}
 
+export function HeroCountdown() {
+  const {
+    time,
+    displayTime,
+    displayDate,
+    finishedPhase,
+    setFinishedPhase,
+    targetDate,
+    saveNewTargetDate,
+    isParty,
+  } = useTrip();
+
+  const heroCopy = useMotivationalHeroDay(time);
+  const canRotate = heroCopy.mode === "motivational" && finishedPhase === "idle";
+  const [showMotivational, setShowMotivational] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
+  const [showPickDateBtn, setShowPickDateBtn] = useState(false);
+
+  // Alterna título ↔ copy a cada 1 minuto (só nos dias 3/2/1).
   useEffect(() => {
-    const update = () => setTime(getTimeLeft(TRIP.targetDate));
-    update();
-    const interval = window.setInterval(update, 1000);
-    return () => window.clearInterval(interval);
-  }, []);
+    if (!canRotate) {
+      setShowMotivational(false);
+      return;
+    }
+
+    setShowMotivational(true);
+    const id = window.setInterval(() => {
+      setShowMotivational((v) => !v);
+    }, UI.heroTitleRotateMs);
+
+    return () => window.clearInterval(id);
+  }, [canRotate, heroCopy.day]);
+
+  // Botão "Escolher outra data" 5s após Macio.
+  useEffect(() => {
+    if (finishedPhase !== "macio") {
+      setShowPickDateBtn(false);
+      return;
+    }
+    setShowPickDateBtn(false);
+    const id = window.setTimeout(() => setShowPickDateBtn(true), 5_000);
+    return () => window.clearTimeout(id);
+  }, [finishedPhase]);
+
+  const finished = Boolean(time?.finished);
+  const navLabel = `${displayDate.split(" de ")[0] ?? ""} · ${displayTime}`.toUpperCase();
+
+  const handleCuiudo = async () => {
+    setFinishedPhase("cuiudo");
+    await launchPartyBurst();
+  };
+
+  const handleMacio = () => {
+    setFinishedPhase("macio");
+    void playSadTrombone();
+  };
 
   return (
-    <section id="inicio" className="hero relative min-h-[100svh] overflow-hidden">
+    <section
+      id="inicio"
+      className={`hero relative min-h-[100svh] overflow-hidden ${isParty ? "party-mode" : ""}`}
+    >
       <HeroVideoBackground />
-      <div className="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-between px-5 py-7 sm:px-8 lg:px-12">
+      <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-between px-5 py-7 sm:px-8 lg:px-12">
         <nav className="flex items-center justify-between">
           <a
             href="#inicio"
@@ -129,7 +197,7 @@ export function HeroCountdown() {
             <Plane className="text-coral" size={18} /> FLN / 2026
           </a>
           <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 backdrop-blur-md">
-            15 AGO · {TRIP.displayTime}
+            {navLabel}
           </span>
         </nav>
 
@@ -143,19 +211,100 @@ export function HeroCountdown() {
               <span className="h-px w-9 bg-coral" /> Operação volta pra ilha
             </motion.p>
 
-            <HeroTitleBlock
-              motivationalDay={isMotivational ? heroCopy.day : null}
-              message={isMotivational ? heroCopy.message : null}
-            />
+            <AnimatePresence mode="wait">
+              {finishedPhase === "choice" && finished ? (
+                <motion.div
+                  key="choice"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 1.2 }}
+                >
+                  <h1 className="font-display text-[clamp(2.8rem,9vw,6.5rem)] font-black uppercase leading-[0.88] tracking-[-0.05em] text-white">
+                    Eai
+                    <span className="block text-outline">Fomos embora?</span>
+                  </h1>
+                  <ChoiceButtons
+                    onCuiudo={() => {
+                      void handleCuiudo();
+                    }}
+                    onMacio={handleMacio}
+                  />
+                </motion.div>
+              ) : finishedPhase === "cuiudo" ? (
+                <motion.div
+                  key="cuiudo"
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.4 }}
+                >
+                  <h1 className="font-display text-[clamp(1.7rem,5.5vw,4.2rem)] font-black uppercase leading-[0.95] tracking-[-0.04em] text-white [text-shadow:0_4px_30px_rgba(0,0,0,0.55)]">
+                    Aeeee caralhoooo
+                    <span className="mt-2 block text-lime">boraaa Floripa/SC/Jurerê</span>
+                    <span className="mt-2 block text-coral">que me aguarde pohaaa!!!</span>
+                  </h1>
+                </motion.div>
+              ) : finishedPhase === "macio" ? (
+                <motion.div
+                  key="macio"
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.3 }}
+                >
+                  <h1 className="font-display text-[clamp(1.55rem,4.8vw,3.4rem)] font-black uppercase leading-[1.05] tracking-[-0.035em] text-white">
+                    Nós samos macio????
+                    <span className="mt-3 block text-coral">
+                      Então trabalha e mete o pé da casa do seu pai cara.
+                    </span>
+                  </h1>
+                  <p className="mt-6 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
+                    E o chile? e Jurerê?, e Floripa?, e Santa catarina?, e a Pipoca? HAMMM ?
+                    Vamuuu embora aqui nãoé nosso lugar. Se nào é hoje é quando? Já escolhe a
+                    pohaa da data para o próximo dia que vai sumir daqui.
+                  </p>
 
-            <DefaultHeroSubtitle show={!isMotivational} />
+                  <AnimatePresence>
+                    {showPickDateBtn ? (
+                      <motion.button
+                        key="pick-date"
+                        type="button"
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.8 }}
+                        onClick={() => setDateOpen(true)}
+                        className="mt-8 rounded-full bg-coral px-6 py-4 text-sm font-black uppercase tracking-[0.12em] text-ink shadow-[0_0_35px_rgba(255,118,87,0.35)] transition hover:brightness-110"
+                      >
+                        Escolher outra data
+                      </motion.button>
+                    ) : null}
+                  </AnimatePresence>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="normal"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <HeroTitleBlock
+                    showMotivational={showMotivational}
+                    motivationalDay={heroCopy.day}
+                    message={heroCopy.message}
+                  />
+                  <DefaultHeroSubtitle show={!showMotivational} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div>
             {time ? (
               <>
                 <CountdownTimer time={time} />
-                <DaysRemainingCard time={time} />
+                <DaysRemainingCard time={time} displayTime={displayTime} />
               </>
             ) : (
               <div className="h-40 animate-pulse rounded-3xl bg-white/5" />
@@ -164,12 +313,24 @@ export function HeroCountdown() {
         </div>
 
         <a
-          href="#passagem"
+          href={finishedPhase === "cuiudo" ? "#chile" : "#passagem"}
           className="flex w-fit items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-white/50 transition hover:text-white"
         >
-          Começar a jornada <ArrowDown className="animate-bounce" size={16} />
+          {finishedPhase === "cuiudo" ? "Ver o Chile" : "Começar a jornada"}{" "}
+          <ArrowDown className="animate-bounce" size={16} />
         </a>
       </div>
+
+      <DatePickerModal
+        open={dateOpen}
+        currentIso={targetDate}
+        onClose={() => setDateOpen(false)}
+        onSave={(iso) => {
+          saveNewTargetDate(iso);
+          setDateOpen(false);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
     </section>
   );
 }

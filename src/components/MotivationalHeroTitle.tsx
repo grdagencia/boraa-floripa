@@ -11,18 +11,24 @@ const fadeTransition = {
 };
 
 type HeroTitleBlockProps = {
+  /** Se true e houver message, mostra a copy; senão o título Let's go. */
+  showMotivational: boolean;
   motivationalDay: MotivationalDay | null;
   message: string | null;
 };
 
-export function HeroTitleBlock({ motivationalDay, message }: HeroTitleBlockProps) {
-  const titleKey =
-    motivationalDay !== null && message ? `motivational-${motivationalDay}` : "default";
+export function HeroTitleBlock({
+  showMotivational,
+  motivationalDay,
+  message,
+}: HeroTitleBlockProps) {
+  const showCopy = showMotivational && motivationalDay !== null && Boolean(message);
+  const titleKey = showCopy ? `motivational-${motivationalDay}` : "default";
 
   return (
     <div className="min-h-[clamp(8rem,28vw,12rem)] lg:min-h-[clamp(10rem,32vw,14rem)]">
       <AnimatePresence mode="wait">
-        {motivationalDay !== null && message ? (
+        {showCopy && message ? (
           <motion.p
             key={titleKey}
             role="heading"

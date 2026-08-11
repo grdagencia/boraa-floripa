@@ -3,14 +3,23 @@
 import { useEffect, useRef } from "react";
 import { UI } from "@/data/trip";
 
+type HeroVideoBackgroundProps = {
+  videos?: string[];
+  className?: string;
+  overlayClassName?: string;
+};
+
 /**
  * Playlist suave com 2 players:
  * - um toca o vídeo atual
  * - o outro pré-carrega o próximo
  * - no fim, faz crossfade e troca
  */
-export function HeroVideoBackground() {
-  const videos = UI.heroVideos;
+export function HeroVideoBackground({
+  videos = UI.heroVideos,
+  className = "absolute inset-0 h-full w-full object-cover will-change-[opacity]",
+  overlayClassName = "absolute inset-0 bg-[linear-gradient(90deg,rgba(5,18,23,.88)_0%,rgba(5,18,23,.55)_55%,rgba(5,18,23,.28)_100%)]",
+}: HeroVideoBackgroundProps) {
   const rate = UI.heroVideoPlaybackRate;
   const fadeMs = UI.heroVideoCrossfadeMs;
 
@@ -26,6 +35,10 @@ export function HeroVideoBackground() {
     const a = aRef.current;
     const b = bRef.current;
     if (!a || !b) return;
+
+    indexRef.current = 0;
+    activeSlotRef.current = "a";
+    fadingRef.current = false;
 
     const prepare = (el: HTMLVideoElement, src: string) => {
       el.playbackRate = rate;
@@ -102,7 +115,6 @@ export function HeroVideoBackground() {
 
       idle.style.transition = `opacity ${fadeMs}ms ease`;
       active.style.transition = `opacity ${fadeMs}ms ease`;
-      // force reflow so transition applies
       void idle.offsetWidth;
       idle.style.opacity = "1";
       active.style.opacity = "0";
@@ -161,11 +173,21 @@ export function HeroVideoBackground() {
     };
   }, [videos, rate, fadeMs]);
 
+  if (!videos.length) {
+    return (
+      <>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#07191D] via-teal/40 to-[#1a0a08]" />
+        <div className={overlayClassName} />
+        <div className="noise absolute inset-0 opacity-25" />
+      </>
+    );
+  }
+
   return (
     <>
       <video
         ref={aRef}
-        className="absolute inset-0 h-full w-full object-cover will-change-[opacity]"
+        className={className}
         muted
         playsInline
         preload="auto"
@@ -173,13 +195,13 @@ export function HeroVideoBackground() {
       />
       <video
         ref={bRef}
-        className="absolute inset-0 h-full w-full object-cover will-change-[opacity]"
+        className={className}
         muted
         playsInline
         preload="auto"
         aria-hidden
       />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,18,23,.88)_0%,rgba(5,18,23,.55)_55%,rgba(5,18,23,.28)_100%)]" />
+      <div className={overlayClassName} />
       <div className="noise absolute inset-0 opacity-25" />
     </>
   );
