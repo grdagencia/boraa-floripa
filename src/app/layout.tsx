@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { PwaProvider } from "@/components/PwaProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -12,9 +13,47 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space",
 });
 
+const APP_NAME = "Floripa";
+const APP_TITLE = "LET'S GO POHAAA # FLORIPA";
+const APP_DESCRIPTION = "Contagem regressiva para a volta a Florianópolis.";
+
 export const metadata: Metadata = {
-  title: "LET'S GO POHAAA # FLORIPA",
-  description: "Contagem regressiva para a volta a Florianópolis.",
+  applicationName: APP_NAME,
+  title: {
+    default: APP_TITLE,
+    template: "%s · Floripa",
+  },
+  description: APP_DESCRIPTION,
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: APP_NAME,
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+  },
+  openGraph: {
+    type: "website",
+    siteName: APP_NAME,
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#07191D",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -24,9 +63,10 @@ export default function RootLayout({
     <html lang="pt-BR" className="scroll-smooth">
       <head>
         <link rel="preload" href="/images/aviao.svg" as="image" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
-        {children}
+        <PwaProvider swUrl="/serwist/sw.js">{children}</PwaProvider>
       </body>
     </html>
   );

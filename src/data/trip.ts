@@ -33,7 +33,7 @@ export const UI = {
   // Fade entre um vídeo e o próximo (ms).
   heroVideoCrossfadeMs: 900,
   // Timer fica vermelho quando faltam este número de dias ou menos.
-  urgentDaysThreshold: 2,
+  urgentDaysThreshold: 3,
 };
 
 export type AirbnbOption = {

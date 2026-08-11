@@ -223,7 +223,7 @@ export function HeroCountdown() {
             </motion.div>
           </div>
 
-          <div>
+          <div id="timer" className="scroll-mt-4">
             {time ? (
               <>
                 <CountdownTimer time={time} />

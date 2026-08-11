@@ -51,7 +51,15 @@ export function smoothScrollTo(
   block: ScrollLogicalPosition = "start",
 ) {
   const el = document.getElementById(id);
-  el?.scrollIntoView({ behavior: "smooth", block });
+  if (!el) return;
+
+  // No timer, força centralizar na viewport (ajuda muito no landscape mobile).
+  const preferCenter = id === "timer" || id === "airbnb-stage" || id === "passagem-card";
+  el.scrollIntoView({
+    behavior: "smooth",
+    block: preferCenter ? "center" : block,
+    inline: "nearest",
+  });
 }
 
 export function waitForWindowEvent(name: string, signal?: AbortSignal) {
