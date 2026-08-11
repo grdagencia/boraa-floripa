@@ -151,7 +151,7 @@ export function HeroCountdown() {
             <DefaultHeroSubtitle show={!isMotivational} />
           </div>
 
-          <div id="timer" className="scroll-mt-4">
+          <div>
             {time ? (
               <>
                 <CountdownTimer time={time} />

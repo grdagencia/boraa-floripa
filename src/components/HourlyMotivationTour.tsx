@@ -57,8 +57,7 @@ export function HourlyMotivationTour({ enabled }: { enabled: boolean }) {
       try {
         dispatchAirbnb({ action: "pause" });
 
-        // Começa no timer (não só no topo), para landscape no celular.
-        smoothScrollTo("timer", "center");
+        smoothScrollTo("inicio");
         setOverlay({
           kind: "caption",
           text: "Mais uma hora passou. Hora de lembrar por que estamos fazendo isso.",
@@ -119,8 +118,7 @@ export function HourlyMotivationTour({ enabled }: { enabled: boolean }) {
         setOverlay(null);
 
         await wait(1200, controller.signal);
-        // Volta focando o timer (importante no celular landscape).
-        smoothScrollTo("timer", "center");
+        smoothScrollTo("inicio");
         await wait(2000, controller.signal);
       } catch {
         // Abortado no unmount.
