@@ -1,0 +1,10 @@
+---
+description: Sempre entregar alterações na branch main (commit + push).
+alwaysApply: true
+---
+
+# Deploy na main
+
+- Sempre faça commit e **push direto na `main`** deste repositório.
+- Não deixe mudanças só em feature branches/PRs, a menos que o usuário peça explicitamente o contrário.
+- Fluxo padrão: commit → merge/checkout `main` se necessário → `git push origin main`.
