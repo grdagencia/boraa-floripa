@@ -31,10 +31,9 @@ export function HeroTitleBlock({ motivationalDay, message }: HeroTitleBlockProps
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={fadeTransition}
-            className="font-display text-[clamp(1.05rem,2.6vw,1.75rem)] font-black leading-[1.38] tracking-[-0.025em] text-white sm:leading-[1.42]"
-          >
-            {message}
-          </motion.p>
+            className="motivational-copy font-display text-[clamp(1.05rem,2.55vw,1.65rem)] font-medium leading-[1.65] tracking-[-0.015em] text-white/95 [text-shadow:0_2px_18px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.45)]"
+            dangerouslySetInnerHTML={{ __html: message }}
+          />
         ) : (
           <motion.div
             key="default"
