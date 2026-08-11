@@ -1,13 +1,16 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowDown, MapPin, Plane } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { HeroVideoBackground } from "@/components/HeroVideoBackground";
+import {
+  DefaultHeroSubtitle,
+  HeroTitleBlock,
+} from "@/components/MotivationalHeroTitle";
 import { TRIP, UI } from "@/data/trip";
+import { useMotivationalHeroDay } from "@/hooks/useMotivationalHeroDay";
 import { getTimeLeft, type TimeLeft } from "@/lib/countdown";
-
-const LAST_DAYS_KEY = "floripa-last-days";
 
 function CountdownTimer({ time }: { time: TimeLeft }) {
   const urgent = !time.finished && time.days <= UI.urgentDaysThreshold;
@@ -104,53 +107,11 @@ function DaysRemainingCard({ time }: { time: TimeLeft }) {
 
 export function HeroCountdown() {
   const [time, setTime] = useState<TimeLeft | null>(null);
-  const [dayAlert, setDayAlert] = useState<number | null>(null);
-  const primedDays = useRef(false);
+  const heroCopy = useMotivationalHeroDay(time);
+  const isMotivational = heroCopy.mode === "motivational";
 
   useEffect(() => {
-    const update = () => {
-      const next = getTimeLeft(TRIP.targetDate);
-      setTime(next);
-
-      if (next.finished) return;
-
-      if (!primedDays.current) {
-        primedDays.current = true;
-        try {
-          const stored = window.localStorage.getItem(LAST_DAYS_KEY);
-          if (stored === null) {
-            window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
-          } else {
-            const previous = Number(stored);
-            if (Number.isFinite(previous) && next.days < previous) {
-              setDayAlert(next.days);
-              window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
-              window.setTimeout(() => setDayAlert(null), 6500);
-            } else if (next.days !== previous) {
-              window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
-            }
-          }
-        } catch {
-          // storage bloqueado
-        }
-        return;
-      }
-
-      try {
-        const stored = window.localStorage.getItem(LAST_DAYS_KEY);
-        const previous = stored === null ? null : Number(stored);
-        if (previous !== null && Number.isFinite(previous) && next.days < previous) {
-          setDayAlert(next.days);
-          window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
-          window.setTimeout(() => setDayAlert(null), 6500);
-        } else if (previous !== next.days) {
-          window.localStorage.setItem(LAST_DAYS_KEY, String(next.days));
-        }
-      } catch {
-        // ignore
-      }
-    };
-
+    const update = () => setTime(getTimeLeft(TRIP.targetDate));
     update();
     const interval = window.setInterval(update, 1000);
     return () => window.clearInterval(interval);
@@ -181,46 +142,13 @@ export function HeroCountdown() {
             >
               <span className="h-px w-9 bg-coral" /> Operação volta pra ilha
             </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, y: 35 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75 }}
-              className="font-display text-[clamp(4.2rem,11vw,9.5rem)] font-black uppercase leading-[0.78] tracking-[-0.065em] text-white"
-            >
-              Let&apos;s go
-              <span className="block text-outline">pohaaa</span>
-            </motion.h1>
 
-            <AnimatePresence mode="wait">
-              {dayAlert !== null ? (
-                <motion.p
-                  key={dayAlert}
-                  initial={{ opacity: 0, y: 18, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.55 }}
-                  className="mt-5 font-display text-[clamp(1.6rem,4vw,2.8rem)] font-black uppercase tracking-[-0.04em] text-lime"
-                >
-                  {dayAlert === 1
-                    ? "Falta 1 dia. A ilha está perto."
-                    : `Faltam ${dayAlert} dias. O relógio aperta.`}
-                </motion.p>
-              ) : null}
-            </AnimatePresence>
+            <HeroTitleBlock
+              motivationalDay={isMotivational ? heroCopy.day : null}
+              message={isMotivational ? heroCopy.message : null}
+            />
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mt-7 flex flex-wrap items-center gap-4"
-            >
-              <span className="rounded-full bg-lime px-5 py-2.5 text-sm font-black text-ink">
-                # FLORIPA
-              </span>
-              <p className="max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
-                Trabalhar com propósito. Fazer dinheiro com coragem. Voltar para a ilha com a vida que a gente escolheu.
-              </p>
-            </motion.div>
+            <DefaultHeroSubtitle show={!isMotivational} />
           </div>
 
           <div id="timer" className="scroll-mt-4">
