@@ -185,10 +185,10 @@ export function HeroCountdown() {
   return (
     <section
       id="inicio"
-      className={`hero relative min-h-[100svh] overflow-hidden ${isParty ? "party-mode" : ""}`}
+      className={`hero relative overflow-hidden ${isParty ? "party-mode" : ""}`}
     >
       <HeroVideoBackground />
-      <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-between px-5 py-7 sm:px-8 lg:px-12">
+      <div className="relative z-10 mx-auto flex min-h-dvh max-w-7xl flex-col justify-between px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 lg:px-12">
         <nav className="flex items-center justify-between">
           <a
             href="#inicio"
