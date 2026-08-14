@@ -1,9 +1,9 @@
 export const TRIP = {
   // EDITE AQUI a data/hora do voo (fuso America/Sao_Paulo).
-  targetDate: "2026-08-15T05:55:00-03:00",
+  targetDate: "2026-08-15T00:00:00-03:00",
   timeZone: "America/Sao_Paulo",
   displayDate: "15 de agosto de 2026",
-  displayTime: "05:55",
+  displayTime: "00:00",
   // EDITE AQUI a imagem do cartão / bilhete (arquivo em public/images/).
   ticketImage: "/images/cartao.png",
 };
@@ -38,6 +38,14 @@ export const UI = {
   chileVideos: ["/videos/chile1.mp4", "/videos/chile2.mp4", "/videos/chile3.mp4"],
   // Alternância título ↔ copy motivacional (ms).
   heroTitleRotateMs: 60_000,
+};
+
+/** Meta do iPhone 15 Pro Max. */
+export const GOAL = {
+  name: "iPhone 15 Pro Max",
+  targetDate: "2026-08-26T00:00:00-03:00",
+  displayDate: "Dia 26 de Agosto",
+  storageKey: "floripa-iphone-goal-v1",
 };
 
 export type AirbnbOption = {

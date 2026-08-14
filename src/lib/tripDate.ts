@@ -1,6 +1,6 @@
 /** Persistência da data-alvo do countdown (override do TRIP.targetDate). */
 
-export const TARGET_DATE_STORAGE_KEY = "floripa-target-date-v1";
+export const TARGET_DATE_STORAGE_KEY = "floripa-target-date-v2";
 
 export function readStoredTargetDate(fallback: string): string {
   if (typeof window === "undefined") return fallback;
@@ -30,7 +30,7 @@ export function clearStoredTargetDate() {
 /** Converte valor de <input type="datetime-local"> (local) para ISO com offset -03:00. */
 export function datetimeLocalToTripIso(localValue: string): string {
   // localValue: "2026-09-20T05:55"
-  const [datePart, timePart = "05:55"] = localValue.split("T");
+  const [datePart, timePart = "00:00"] = localValue.split("T");
   const time = timePart.length === 5 ? `${timePart}:00` : timePart;
   return `${datePart}T${time}-03:00`;
 }

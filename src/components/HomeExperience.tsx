@@ -5,6 +5,7 @@ import { AirbnbCarousel } from "@/components/AirbnbCarousel";
 import { ChileDestinationSection } from "@/components/ChileDestinationSection";
 import { FinalMotivationSection } from "@/components/FinalMotivationSection";
 import { FlightTicketSection } from "@/components/FlightTicketSection";
+import { GoalSection } from "@/components/GoalSection";
 import { HeroCountdown } from "@/components/HeroCountdown";
 import { HourlyMotivationTour } from "@/components/HourlyMotivationTour";
 import { IntroPlaneReveal } from "@/components/IntroPlaneReveal";
@@ -34,6 +35,7 @@ function HomeBody() {
             <FlightTicketSection />
             <AirbnbCarousel />
             <PaginatedChecklist />
+            <GoalSection />
             <FinalMotivationSection />
           </>
         ) : null}

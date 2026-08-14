@@ -53,7 +53,8 @@ export function smoothScrollTo(
   const el = document.getElementById(id);
   if (!el) return;
 
-  const preferCenter = id === "airbnb-stage" || id === "passagem-card";
+  const preferCenter =
+    id === "airbnb-stage" || id === "passagem-card" || id === "meta";
   el.scrollIntoView({
     behavior: "smooth",
     block: preferCenter ? "center" : block,
@@ -94,4 +95,6 @@ export const TOUR_EVENTS = {
   missions: "floripa:tour-missions",
   ticket: "floripa:tour-ticket",
   ticketDone: "floripa:ticket-done",
+  iphone: "floripa:tour-iphone",
+  iphoneSpinDone: "floripa:iphone-spin-done",
 } as const;

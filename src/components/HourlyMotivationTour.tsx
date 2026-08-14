@@ -31,6 +31,10 @@ function dispatchTicket(detail: Record<string, unknown>) {
   window.dispatchEvent(new CustomEvent(TOUR_EVENTS.ticket, { detail }));
 }
 
+function dispatchIphone(detail: Record<string, unknown>) {
+  window.dispatchEvent(new CustomEvent(TOUR_EVENTS.iphone, { detail }));
+}
+
 function setTourLock(locked: boolean) {
   window.dispatchEvent(
     new CustomEvent(TOUR_LOCK_EVENT, { detail: { locked } }),
@@ -108,6 +112,25 @@ export function HourlyMotivationTour({ enabled }: { enabled: boolean }) {
 
         dispatchMissions({ action: "highlight", durationMs: 7000 });
         await wait(7200, controller.signal);
+
+        setOverlay({
+          kind: "caption",
+          text: "E a meta? O maquinário oficial ainda tá no radar.",
+        });
+        smoothScrollTo("meta", "center");
+        await wait(900, controller.signal);
+        dispatchIphone({ action: "spin" });
+        await Promise.race([
+          waitForWindowEvent(TOUR_EVENTS.iphoneSpinDone, controller.signal),
+          wait(5200, controller.signal),
+        ]);
+        setOverlay({
+          kind: "caption",
+          text: "iPhone 15 Pro Max. Dia 26. Alvo travado.",
+        });
+        await wait(3200, controller.signal);
+        setOverlay(null);
+        await wait(500, controller.signal);
 
         smoothScrollTo("final");
         setOverlay({
