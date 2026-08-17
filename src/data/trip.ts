@@ -1,8 +1,8 @@
 export const TRIP = {
-  // EDITE AQUI a data/hora do voo (fuso America/Sao_Paulo).
-  targetDate: "2026-08-15T00:00:00-03:00",
+  // EDITE AQUI a data/hora alvo (fuso America/Sao_Paulo).
+  targetDate: "2026-08-19T00:00:00-03:00",
   timeZone: "America/Sao_Paulo",
-  displayDate: "15 de agosto de 2026",
+  displayDate: "19 de agosto de 2026",
   displayTime: "00:00",
   // EDITE AQUI a imagem do cartão / bilhete (arquivo em public/images/).
   ticketImage: "/images/cartao.png",
@@ -16,17 +16,21 @@ export const UI = {
   notificationFirstDelayMs: 2800,
   // Quantidade de missões por página no checklist.
   missionsPerPage: 6,
-  // EDITE AQUI a imagem do avião da introdução.
-  planeImage: "/images/aviao.svg",
-  // Duração total da animação de abertura com avião (ms).
-  introDurationMs: 5000,
-  // EDITE AQUI os vídeos de fundo do hero (ordem do playlist).
-  // Versões otimizadas em public/videos/ (1080p, sem áudio, faststart).
-  heroVideos: [
-    "/videos/1.mp4", // Floripa4k
-    "/videos/2.mp4",
-    "/videos/3.mp4",
-    "/videos/4.mp4",
+  // Splash tipográfico inicial (ms visível antes do fade-out).
+  introDurationMs: 2700,
+  // Imagem de fundo do hero (Modo Caverna).
+  heroImage:
+    "/images/wolf-of-wall-street-leonardo-dicaprio1-375fc9b29eb84a939f9a4ce34470d414.jpg",
+  // GIF da seção final.
+  finalGif: "/images/spector.gif",
+  // Vídeos obrigatórios do modo caverna.
+  caveVideos: [
+    "/videos/C1.mp4",
+    "/videos/C2.mp4",
+    "/videos/C3.mp4",
+    "/videos/C4.mp4",
+    "/videos/C5.mp4",
+    "/videos/C6.mp4",
   ],
   // Velocidade do vídeo (1 = normal, 0.5 = metade da velocidade).
   heroVideoPlaybackRate: 0.55,
@@ -160,10 +164,5 @@ export const AIRBNB_OPTIONS: AirbnbOption[] = [
 // EDITE AQUI para adicionar, remover ou renomear missões.
 // Cada missão precisa de um id único e estável.
 export const INITIAL_MISSIONS: Mission[] = [
-  { id: "alugar-carro", label: "Alugar o carro" },
-  { id: "alugar-airbnb", label: "Alugar o Airbnb" },
-  { id: "visitar-mae", label: "Visitar minha mãe" },
-  { id: "shopping-iury", label: "Ir com o Iury no shopping" },
-  { id: "comprar-mala", label: "Comprar mala" },
-  { id: "monitor-sc", label: "Mandar o monitor para Santa Catarina" },
+  { id: "liberdade", label: "LIBERDADE." },
 ];

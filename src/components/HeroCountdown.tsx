@@ -4,14 +4,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown, MapPin, Plane } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DatePickerModal } from "@/components/DatePickerModal";
-import { HeroVideoBackground } from "@/components/HeroVideoBackground";
-import {
-  DefaultHeroSubtitle,
-  HeroTitleBlock,
-} from "@/components/MotivationalHeroTitle";
+import { DefaultHeroSubtitle } from "@/components/MotivationalHeroTitle";
 import { useTrip } from "@/components/TripProvider";
 import { UI } from "@/data/trip";
-import { useMotivationalHeroDay } from "@/hooks/useMotivationalHeroDay";
 import type { TimeLeft } from "@/lib/countdown";
 import { launchPartyBurst } from "@/lib/party";
 import { playSadTrombone } from "@/lib/celebration";
@@ -58,14 +53,7 @@ function CountdownTimer({ time }: { time: TimeLeft }) {
   );
 }
 
-function DaysRemainingCard({
-  time,
-  displayTime,
-}: {
-  time: TimeLeft;
-  displayTime: string;
-}) {
-  const totalDays = time.finished ? 0 : time.days;
+function DaysRemainingCard({ time }: { time: TimeLeft }) {
   const urgent = !time.finished && time.days <= UI.urgentDaysThreshold;
 
   return (
@@ -77,18 +65,14 @@ function DaysRemainingCard({
     >
       <div>
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/45">
-          Próximo destino · voo {displayTime}
+          Operação modo caverna
         </p>
         <p
           className={`mt-1 text-lg font-bold ${
             urgent || time.finished ? "text-red-300" : "text-white"
           }`}
         >
-          {time.finished
-            ? "Floripa é agora!"
-            : totalDays === 1
-              ? "Falta 1 dia para Floripa"
-              : `Faltam ${totalDays} dias para Floripa`}
+          {time.finished ? "BH é agora. Executa." : "Foco total. BH dia 19!"}
         </p>
       </div>
       <div className="grid size-11 place-items-center rounded-full bg-coral text-ink shadow-lg shadow-coral/20">
@@ -137,26 +121,8 @@ export function HeroCountdown() {
     isParty,
   } = useTrip();
 
-  const heroCopy = useMotivationalHeroDay(time);
-  const canRotate = heroCopy.mode === "motivational" && finishedPhase === "idle";
-  const [showMotivational, setShowMotivational] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
   const [showPickDateBtn, setShowPickDateBtn] = useState(false);
-
-  // Alterna título ↔ copy a cada 1 minuto (só nos dias 3/2/1).
-  useEffect(() => {
-    if (!canRotate) {
-      setShowMotivational(false);
-      return;
-    }
-
-    setShowMotivational(true);
-    const id = window.setInterval(() => {
-      setShowMotivational((v) => !v);
-    }, UI.heroTitleRotateMs);
-
-    return () => window.clearInterval(id);
-  }, [canRotate, heroCopy.day]);
 
   // Botão "Escolher outra data" 5s após Macio.
   useEffect(() => {
@@ -187,14 +153,24 @@ export function HeroCountdown() {
       id="inicio"
       className={`hero relative overflow-hidden ${isParty ? "party-mode" : ""}`}
     >
-      <HeroVideoBackground />
+      <div className="absolute inset-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={UI.heroImage}
+          alt=""
+          className="h-full w-full object-cover object-[center_20%]"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.94)_0%,rgba(0,0,0,.78)_48%,rgba(0,0,0,.5)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.4)_0%,transparent_30%,rgba(0,0,0,.7)_100%)]" />
+        <div className="noise absolute inset-0 opacity-25" />
+      </div>
       <div className="relative z-10 mx-auto flex min-h-dvh max-w-7xl flex-col justify-between px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 lg:px-12">
         <nav className="flex items-center justify-between">
           <a
             href="#inicio"
             className="flex items-center gap-2 text-sm font-black tracking-[0.18em] text-white"
           >
-            <Plane className="text-coral" size={18} /> FLN / 2026
+            <Plane className="text-coral" size={18} /> BH / 2026
           </a>
           <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 backdrop-blur-md">
             {navLabel}
@@ -208,7 +184,7 @@ export function HeroCountdown() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-5 flex items-center gap-3 text-xs font-black uppercase tracking-[0.3em] text-coral"
             >
-              <span className="h-px w-9 bg-coral" /> Operação volta pra ilha
+              <span className="h-px w-9 bg-coral" /> Operação modo caverna: destino BH
             </motion.p>
 
             <AnimatePresence mode="wait">
@@ -289,12 +265,11 @@ export function HeroCountdown() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <HeroTitleBlock
-                    showMotivational={showMotivational}
-                    motivationalDay={heroCopy.day}
-                    message={heroCopy.message}
-                  />
-                  <DefaultHeroSubtitle show={!showMotivational} />
+                  <h1 className="font-display text-[clamp(2.8rem,8vw,6.8rem)] font-black uppercase leading-[0.86] tracking-[-0.055em] text-white">
+                    A hora de ser
+                    <span className="block text-outline">cuiudo.</span>
+                  </h1>
+                  <DefaultHeroSubtitle show />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -304,7 +279,7 @@ export function HeroCountdown() {
             {time ? (
               <>
                 <CountdownTimer time={time} />
-                <DaysRemainingCard time={time} displayTime={displayTime} />
+                <DaysRemainingCard time={time} />
               </>
             ) : (
               <div className="h-40 animate-pulse rounded-3xl bg-white/5" />
@@ -313,10 +288,10 @@ export function HeroCountdown() {
         </div>
 
         <a
-          href={finishedPhase === "cuiudo" ? "#chile" : "#passagem"}
+          href={finishedPhase === "cuiudo" ? "#chile" : "#videos-obrigatorios"}
           className="flex w-fit items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-white/50 transition hover:text-white"
         >
-          {finishedPhase === "cuiudo" ? "Ver o Chile" : "Começar a jornada"}{" "}
+          {finishedPhase === "cuiudo" ? "Ver o Chile" : "Ir para as missões"}{" "}
           <ArrowDown className="animate-bounce" size={16} />
         </a>
       </div>

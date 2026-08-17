@@ -1,6 +1,6 @@
 /** Persistência da data-alvo do countdown (override do TRIP.targetDate). */
 
-export const TARGET_DATE_STORAGE_KEY = "floripa-target-date-v2";
+export const TARGET_DATE_STORAGE_KEY = "floripa-target-date-v3";
 
 export function readStoredTargetDate(fallback: string): string {
   if (typeof window === "undefined") return fallback;

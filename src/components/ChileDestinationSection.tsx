@@ -24,7 +24,7 @@ export function ChileDestinationSection({ active }: { active: boolean }) {
     >
       <HeroVideoBackground
         videos={UI.chileVideos}
-        overlayClassName="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,18,23,.72)_0%,rgba(5,18,23,.45)_45%,rgba(5,18,23,.82)_100%)]"
+        overlayClassName="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.78)_0%,rgba(0,0,0,.48)_45%,rgba(0,0,0,.86)_100%)]"
       />
       <div className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-center px-5 py-20 sm:px-8">
         <AnimatePresence>

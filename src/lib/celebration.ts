@@ -142,3 +142,8 @@ export async function playAlertBuzzer() {
     // ignore
   }
 }
+
+/** Bipe curto de alerta (tour / vídeos obrigatórios). */
+export async function playNotificationBeep() {
+  await playAlertBuzzer();
+}

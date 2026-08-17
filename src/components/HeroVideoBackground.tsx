@@ -16,7 +16,7 @@ type HeroVideoBackgroundProps = {
  * - no fim, faz crossfade e troca
  */
 export function HeroVideoBackground({
-  videos = UI.heroVideos,
+  videos = [],
   className = "absolute inset-0 h-full min-h-full w-full object-cover will-change-[opacity]",
   overlayClassName = "absolute inset-0 bg-[linear-gradient(90deg,rgba(5,18,23,.88)_0%,rgba(5,18,23,.55)_55%,rgba(5,18,23,.28)_100%)]",
 }: HeroVideoBackgroundProps) {

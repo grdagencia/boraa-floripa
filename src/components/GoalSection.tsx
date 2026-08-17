@@ -303,7 +303,7 @@ export function GoalSection() {
     <section
       id="meta"
       ref={sectionRef}
-      className="relative overflow-hidden border-t border-white/5 bg-[#05080a]"
+      className="relative overflow-hidden border-t border-white/5 bg-black"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_40%,rgba(255,118,87,0.12),transparent_55%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_80%,rgba(217,255,112,0.06),transparent_50%)]" />
@@ -319,13 +319,11 @@ export function GoalSection() {
           <p className="text-xs font-black uppercase tracking-[0.32em] text-coral">
             Meta travada
           </p>
-          <h2 className="mt-4 font-display text-[clamp(2.6rem,7vw,5.4rem)] font-black uppercase leading-[0.92] tracking-[-0.05em] text-white">
-            Próximo Alvo
-            <span className="block text-outline">Travado.</span>
+          <h2 className="mt-4 max-w-xl font-display text-[clamp(1.7rem,5.2vw,3.8rem)] font-black uppercase leading-[0.95] tracking-[-0.045em] text-white">
+            <span className="text-[#ff1a1a]">E seja cuiudo</span> e pegue essa
+            porra desse celular em{" "}
+            <span className="text-[#ff1a1a]">cuiudo</span>.
           </h2>
-          <p className="mt-5 max-w-md text-base leading-relaxed text-white/60 sm:text-lg">
-            Boraaa pegar o nosso celular!!!
-          </p>
 
           <div className="mt-8 space-y-1">
             <p className="font-display text-2xl font-black tracking-[-0.03em] text-white sm:text-3xl">

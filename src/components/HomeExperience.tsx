@@ -1,18 +1,19 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { AirbnbCarousel } from "@/components/AirbnbCarousel";
 import { ChileDestinationSection } from "@/components/ChileDestinationSection";
 import { FinalMotivationSection } from "@/components/FinalMotivationSection";
-import { FlightTicketSection } from "@/components/FlightTicketSection";
 import { GoalSection } from "@/components/GoalSection";
 import { HeroCountdown } from "@/components/HeroCountdown";
 import { HourlyMotivationTour } from "@/components/HourlyMotivationTour";
 import { IntroPlaneReveal } from "@/components/IntroPlaneReveal";
+import { MandatoryVideosSection } from "@/components/MandatoryVideosSection";
 import { PaginatedChecklist } from "@/components/PaginatedChecklist";
 import { SalesNotification } from "@/components/SalesNotification";
 import { SoftUpdateWatcher } from "@/components/SoftUpdateWatcher";
 import { TripProvider, useTrip } from "@/components/TripProvider";
+import { WarCouncilSection } from "@/components/WarCouncilSection";
+import { XingamentoSection } from "@/components/XingamentoSection";
 
 function HomeBody() {
   const [introDone, setIntroDone] = useState(false);
@@ -32,10 +33,11 @@ function HomeBody() {
         {finishedPhase === "cuiudo" ? <ChileDestinationSection active /> : null}
         {showRest || finishedPhase === "choice" || finishedPhase === "macio" ? (
           <>
-            <FlightTicketSection />
-            <AirbnbCarousel />
+            <MandatoryVideosSection />
+            <XingamentoSection />
             <PaginatedChecklist />
             <GoalSection />
+            <WarCouncilSection />
             <FinalMotivationSection />
           </>
         ) : null}
