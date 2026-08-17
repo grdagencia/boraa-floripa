@@ -158,10 +158,10 @@ export function HeroCountdown() {
         <img
           src={UI.heroImage}
           alt=""
-          className="h-full w-full object-cover object-[center_20%] brightness-110 contrast-125 saturate-[1.08]"
+          className="h-full w-full object-cover object-[center_20%] brightness-105 contrast-125 saturate-[1.05]"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.62)_0%,rgba(0,0,0,.32)_52%,rgba(0,0,0,.12)_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.18)_0%,transparent_42%,rgba(0,0,0,.32)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.74)_0%,rgba(0,0,0,.45)_52%,rgba(0,0,0,.22)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.26)_0%,transparent_42%,rgba(0,0,0,.42)_100%)]" />
         <div className="noise absolute inset-0 opacity-10" />
       </div>
       <div className="relative z-10 mx-auto flex min-h-dvh max-w-7xl flex-col justify-between px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 lg:px-12">
