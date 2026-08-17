@@ -210,16 +210,6 @@ export function HourlyMotivationTour({ enabled }: { enabled: boolean }) {
           </motion.div>
         ) : null}
       </AnimatePresence>
-
-      <button
-        type="button"
-        onClick={() => {
-          window.dispatchEvent(new Event(TOUR_EVENTS.runTour));
-        }}
-        className="fixed bottom-4 right-4 z-50 rounded bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-[0.08em] text-white shadow-lg"
-      >
-        Testar scroll automático
-      </button>
     </>
   );
 }
